@@ -27,10 +27,9 @@ public class Poly {
         deg = n;
     }
 
-    private Poly(Poly p, int n) {
-        terms = new Pair[p.terms.length];
-        terms[p.terms.length - 1] = new Pair(0, n);
-        deg = n;
+    private Poly(int len) {
+        terms = new Pair[len];
+
     }
 
     public int degree() {
@@ -55,7 +54,7 @@ public class Poly {
     // poly1.minus();
 
     public Poly minus() {
-        Poly r = new Poly(this, deg);
+        Poly r = new Poly(this.terms.length);
         for (int i = 0; i < r.terms.length; i++) {
             r.terms[i].coeff = -terms[i].coeff;
         }
@@ -64,18 +63,34 @@ public class Poly {
 
     public Poly add(Poly q) throws NullPointerException {
 
-        Poly largest, smallest;
+        Poly longest, shortest;
         if (q.terms.length > terms.length) {
-            largest = q;
-            smallest = this;
+            longest = q;
+            shortest = this;
         } else {
-            largest = this;
-            smallest = q;
+            longest = this;
+            shortest = q;
         }
-        Poly r = new Poly(largest, Math.max(deg, q.deg));
-        for (int i = 0; i < r.terms.length; i++) {
-            r.terms[i].coeff += largest.terms[i].coeff;
-            r.terms[i].coeff += smallest.terms[i].coeff;
+        Poly r = new Poly(shortest.terms.length + longest.terms.length);
+        r.deg = Math.max(deg, q.deg);
+        int polyPosition = 0;
+        int i;
+        for (i = 0; i < shortest.terms.length; i++) {
+            if (shortest.terms[i].exp == longest.terms[i].exp) {
+                r.terms[polyPosition] = new Pair(shortest.terms[i].coeff + longest.terms[i].coeff, shortest.terms[i].exp);
+            } else {
+                r.terms[polyPosition] = new Pair(shortest.terms[i].coeff, shortest.terms[i].exp);
+                polyPosition++;
+                r.terms[polyPosition] = new Pair(longest.terms[i].coeff, longest.terms[i].exp);
+
+            }
+            polyPosition++;
+
+        }
+        System.out.println("length="+(shortest.terms.length+longest.terms.length)+"\npolyPositon="+polyPosition);
+        for(int j=i;j<longest.terms.length;j++){
+            r.terms[polyPosition] = new Pair(longest.terms[j].coeff, longest.terms[j].exp);
+            polyPosition++;
         }
         return r;
     }
@@ -86,7 +101,7 @@ public class Poly {
             return new Poly();
         }
 
-        Poly r = new Poly(this, deg + q.deg);
+        Poly r = new Poly(q.terms.length);
         for (Pair p : r.terms) {
             if (p.exp == deg + q.deg) {
                 p.coeff = 0;
@@ -104,7 +119,8 @@ public class Poly {
     public String toString() {
         String returnValue = "";
         for (Pair p : terms) {
-            returnValue += p.coeff + "X^" + p.exp + "";
+            if(p != null)
+            returnValue += p.coeff + "X^" + p.exp + " ";
         }
 
 
